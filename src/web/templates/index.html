@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多模态RAG系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #f7f7f8;
+        }
+        body, .main-layout {
+            height: 100vh;
+            min-height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .custom-header-icon {
+            height: 32px;
+            width: 32px;
+            object-fit: contain;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .main-layout {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 270px;
+            background: #fff;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+            z-index: 2;
+        }
+        .sidebar-header {
+            padding: 2rem 1.5rem 1rem 1.5rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-bottom: 1px solid #f0f0f0;
+            background: #f7f7fa;
+            display: flex;
+            align-items: center;
+        }
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0.5rem 1rem 0.5rem;
+        }
+        .session-item {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1rem;
+            border-radius: 0.7rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 1.05rem;
+        }
+        .session-item.active, .session-item:hover {
+            background: #e9f3ff;
+        }
+        .session-item i {
+            margin-right: 0.7rem;
+            color: #0d6efd;
+        }
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #f0f0f0;
+            background: #f7f7fa;
+        }
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #f7f7f8;
+        }
+        .chat-header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid #eee;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: #f0f4fa;
+            display: flex;
+            align-items: center;
+        }
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 2rem 1rem 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message {
+            display: flex;
+            margin-bottom: 1.2rem;
+        }
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+        .chat-bubble {
+            max-width: 70%;
+            padding: 1rem 1.2rem;
+            border-radius: 1.2rem;
+            font-size: 1.08rem;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .chat-message.user .chat-bubble {
+            background: #d1e7ff;
+            color: #222;
+            border-bottom-right-radius: 0.3rem;
+        }
+        .chat-message.bot .chat-bubble {
+            background: #f3f3f3;
+            color: #222;
+            border-bottom-left-radius: 0.3rem;
+        }
+        .chat-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #e3e3e3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin: 0 0.8rem;
+        }
+        .chat-message.user .chat-avatar {
+            background: #0d6efd;
+            color: #fff;
+        }
+        .chat-message.bot .chat-avatar {
+            background: #f3f3f3;
+            color: #0d6efd;
+        }
+        .chat-footer {
+            border-top: 1px solid #eee;
+            padding: 1rem 2rem;
+            background: #f0f4fa;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .chat-footer input[type="text"] {
+            flex: 1;
+            border-radius: 2rem;
+            border: 1px solid #ddd;
+            padding: 0.7rem 1.2rem;
+            font-size: 1.08rem;
+            outline: none;
+        }
+        .chat-footer .btn {
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .upload-label {
+            margin-bottom: 0;
+            cursor: pointer;
+            color: #0d6efd;
+            font-size: 1.3rem;
+        }
+        .source-highlight {
+            background-color: #fff3cd;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.2rem;
+            font-size: 0.95em;
+            margin-right: 0.3em;
+        }
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 60px;
+                min-width: 60px;
+                padding: 0;
+            }
+            .sidebar-header, .sidebar-footer {
+                display: none;
+            }
+            .session-list {
+                padding: 0.5rem 0.2rem;
+            }
+            .session-item span {
+                display: none;
+            }
+        }
+        @media (max-width: 600px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100vw;
+                min-width: 0;
+                height: 60px;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                box-shadow: none;
+            }
+            .chat-section {
+                height: calc(100vh - 60px);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-layout">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-comments me-2"></i>历史会话
+        </div>
+        <div class="session-list" id="sessionList">
+            <!-- 会话列表由JS动态生成 -->
+        </div>
+        <div class="sidebar-footer text-center">
+            <button class="btn btn-outline-primary btn-sm w-100" id="newSessionBtn"><i class="fas fa-plus"></i> 新建会话</button>
+        </div>
+    </aside>
+    <!-- 主聊天区 -->
+    <section class="chat-section">
+        <div class="chat-header">
+            <img src="static/lc2.png" alt="logo" class="custom-header-icon me-2">你好，我是你的科研助手小陈，请问有什么可以帮您？
+        </div>
+        <div class="chat-body" id="chatContainer">
+            <!-- 聊天消息将通过JavaScript动态添加 -->
+        </div>
+        <div class="chat-footer">
+            <label for="fileInput" class="upload-label" title="上传文档">
+                <i class="fas fa-paperclip"></i>
+            </label>
+            <input type="file" id="fileInput" class="d-none" multiple>
+            <input type="text" id="queryInput" placeholder="输入您的问题...">
+            <button class="btn btn-primary" id="sendButton" title="发送">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 假数据：历史会话
+    let sessions = [
+        {id: 1, title: '会话1', active: true, history: []},
+        {id: 2, title: '会话2', active: false, history: []},
+        {id: 3, title: '会话3', active: false, history: []}
+    ];
+    let currentSessionId = 1;
+
+    function renderSessionList() {
+        const sessionList = document.getElementById('sessionList');
+        sessionList.innerHTML = '';
+        sessions.forEach(session => {
+            const item = document.createElement('div');
+            item.className = 'session-item' + (session.active ? ' active' : '');
+            item.innerHTML = `<i class="fas fa-comments"></i><span>${session.title}</span>`;
+            item.onclick = () => switchSession(session.id);
+            sessionList.appendChild(item);
+        });
+    }
+    function switchSession(id) {
+        sessions.forEach(s => s.active = (s.id === id));
+        currentSessionId = id;
+        renderSessionList();
+        renderChat();
+    }
+    document.getElementById('newSessionBtn').onclick = function() {
+        const newId = sessions.length ? Math.max(...sessions.map(s => s.id)) + 1 : 1;
+        sessions.forEach(s => s.active = false);
+        sessions.push({id: newId, title: '会话' + newId, active: true, history: []});
+        currentSessionId = newId;
+        renderSessionList();
+        renderChat();
+    };
+
+    // 聊天功能
+    const chatContainer = document.getElementById('chatContainer');
+    const queryInput = document.getElementById('queryInput');
+    const sendButton = document.getElementById('sendButton');
+    const fileInput = document.getElementById('fileInput');
+
+    sendButton.addEventListener('click', sendQuery);
+    queryInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendQuery();
+        }
+    });
+    document.querySelector('.upload-label').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+        for (const file of files) {
+            uploadFile(file);
+        }
+    }
+    async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        addMessage('system', `正在上传文件：${file.name}`);
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                addMessage('system', `文件 ${file.name} 上传成功`);
+            } else {
+                addMessage('system', `文件 ${file.name} 上传失败: ${result.detail}`);
+            }
+        } catch (error) {
+            addMessage('system', `文件 ${file.name} 上传失败: ${error.message}`);
+        }
+    }
+    async function sendQuery() {
+        const query = queryInput.value.trim();
+        if (!query) return;
+        addMessage('user', query);
+        queryInput.value = '';
+        try {
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `query=${encodeURIComponent(query)}`
+            });
+            const result = await response.json();
+            if (response.ok) {
+                addMessage('bot', result.answer, result.sources);
+            } else {
+                addMessage('system', `查询失败: ${result.detail}`);
+            }
+        } catch (error) {
+            addMessage('system', `查询失败: ${error.message}`);
+        }
+    }
+    function addMessage(sender, content, sources = null) {
+        // 存入当前会话历史
+        const session = sessions.find(s => s.id === currentSessionId);
+        if (session) {
+            session.history.push({sender, content, sources});
+        }
+        renderChat();
+    }
+    function renderChat() {
+        const session = sessions.find(s => s.id === currentSessionId);
+        chatContainer.innerHTML = '';
+        if (!session || !session.history.length) return;
+        session.history.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${msg.sender}`;
+            // 头像
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-avatar';
+            if (msg.sender === 'user') {
+                avatar.innerHTML = '<i class="fas fa-user"></i>';
+            } else if (msg.sender === 'bot') {
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            } else {
+                avatar.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+            messageDiv.appendChild(avatar);
+            // 气泡
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.textContent = msg.content;
+            // 来源高亮
+            if (msg.sources) {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'mt-2';
+                sourcesDiv.innerHTML = '<strong>来源：</strong>';
+                msg.sources.forEach(source => {
+                    const sourceSpan = document.createElement('span');
+                    sourceSpan.className = 'source-highlight';
+                    sourceSpan.textContent = source.metadata.source;
+                    sourcesDiv.appendChild(sourceSpan);
+                });
+                bubble.appendChild(sourcesDiv);
+            }
+            messageDiv.appendChild(bubble);
+            chatContainer.appendChild(messageDiv);
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    // 初始化
+    renderSessionList();
+    renderChat();
+</script>
+</body>
+</html>

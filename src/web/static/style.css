@@ -1,0 +1,277 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f6f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 修改为 min-height 以允许内容溢出 */
+    color: #333;
+}
+
+.chat-container {
+    display: flex;
+    width: 95vw; /* 使用视口宽度 */
+    max-width: 1200px; /* 最大宽度 */
+    height: 90vh; /* 使用视口高度 */
+    max-height: 800px; /* 最大高度 */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* 防止子元素溢出容器 */
+}
+
+/* --- 侧边栏 --- */
+.sidebar {
+    width: 260px;
+    background-color: #202123; /* 深色背景 */
+    color: #ececec;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #303133;
+}
+
+.new-chat-button {
+    background-color: #343541;
+    color: #ececec;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: left;
+    margin-bottom: 20px;
+    transition: background-color 0.2s;
+}
+
+.new-chat-button:hover {
+    background-color: #40414f;
+}
+
+.chat-history {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* 占据剩余空间 */
+    overflow-y: auto; /* 如果历史记录过多则滚动 */
+}
+
+.chat-history li {
+    margin-bottom: 10px;
+}
+
+.chat-history li a {
+    color: #c5c5d2;
+    text-decoration: none;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.chat-history li a:hover {
+    background-color: #343541;
+    color: #fff;
+}
+
+.user-profile {
+    margin-top: auto; /* 推到底部 */
+    padding-top: 15px;
+    border-top: 1px solid #303133;
+    font-size: 0.9em;
+}
+
+/* --- 主聊天区域 --- */
+.main-chat-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #343541; /* ChatGPT 风格的深色背景 */
+}
+
+.chat-header {
+    padding: 15px 20px;
+    background-color: #40414f; /* 稍浅的头部背景 */
+    color: #ececec;
+    border-bottom: 1px solid #2a2b32;
+    text-align: center; /* 可选，让标题居中 */
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto; /* 核心：让消息区域可滚动 */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* 消息之间的间隙 */
+}
+
+.message {
+    display: flex;
+    align-items: flex-start; /* 头像和内容顶部对齐 */
+    max-width: 80%; /* 消息最大宽度 */
+    word-wrap: break-word; /* 自动换行 */
+}
+
+.message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #555;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-right: 10px;
+    flex-shrink: 0; /* 防止头像被压缩 */
+}
+
+.message-content {
+    background-color: #444654; /* AI和用户消息背景 */
+    color: #d1d5db; /* 消息文本颜色 */
+    padding: 10px 15px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.user-message {
+    align-self: flex-end; /* 用户消息靠右 */
+    flex-direction: row-reverse; /* 头像在右边 */
+}
+
+.user-message .message-avatar {
+    margin-left: 10px;
+    margin-right: 0;
+    background-color: #19c37d; /* 用户头像颜色 */
+}
+
+.user-message .message-content {
+     background-color: #29A37E; /* 用户消息内容背景稍作区分 */
+     color: #fff;
+}
+
+.ai-message {
+    align-self: flex-start; /* AI 消息靠左 */
+}
+
+.ai-message .message-avatar {
+    background-color: #8e44ad; /* AI 头像颜色 */
+}
+
+
+/* --- 输入区域 --- */
+.chat-input-area {
+    display: flex;
+    padding: 15px 20px;
+    border-top: 1px solid #2a2b32;
+    background-color: #40414f; /* 输入区域背景 */
+}
+
+#messageInput {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    font-size: 1em;
+    margin-right: 10px;
+    resize: none; /* 禁止用户调整大小 */
+    min-height: 24px; /* 最小高度，可根据字体调整 */
+    max-height: 150px; /* 最大高度，防止无限增长 */
+    overflow-y: auto; /* 内容多时出现滚动条 */
+    background-color: #343541; /* 输入框背景 */
+    color: #ececec; /* 输入文字颜色 */
+}
+
+#messageInput:focus {
+    outline: none;
+    border-color: #19c37d; /* 焦点时边框颜色 */
+    box-shadow: 0 0 0 2px rgba(25, 195, 125, 0.3);
+}
+
+#sendMessageButton {
+    background-color: #19c37d; /* 发送按钮颜色 */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 15px; /* 调整内边距使图标居中 */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+#sendMessageButton:hover {
+    background-color: #15a268;
+}
+
+#sendMessageButton svg {
+    width: 20px; /* SVG 图标大小 */
+    height: 20px;
+}
+
+.chat-footer {
+    padding: 8px 20px;
+    text-align: center;
+    font-size: 0.75em;
+    color: #a0a0a0; /* 页脚文字颜色 */
+    background-color: #343541; /* 与主聊天区背景一致 */
+}
+
+/* 滚动条美化 (可选, 兼容性 Webkit) */
+.chat-messages::-webkit-scrollbar,
+.chat-history::-webkit-scrollbar,
+#messageInput::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.chat-history::-webkit-scrollbar-track,
+#messageInput::-webkit-scrollbar-track {
+    background: #202123; /* 滚动条轨道颜色 */
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.chat-history::-webkit-scrollbar-thumb,
+#messageInput::-webkit-scrollbar-thumb {
+    background-color: #555; /* 滚动条滑块颜色 */
+    border-radius: 4px;
+    border: 2px solid #202123; /* 滑块边框，使其看起来更细 */
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.chat-history::-webkit-scrollbar-thumb:hover,
+#messageInput::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+}
+
+/* 响应式调整：小屏幕时可以考虑隐藏侧边栏或改变布局 */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none; /* 或者你可以实现一个汉堡菜单来切换显示 */
+    }
+    .chat-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+    }
+    .chat-messages {
+        padding: 10px;
+    }
+    .chat-input-area {
+        padding: 10px;
+    }
+    .message {
+        max-width: 90%;
+    }
+}
